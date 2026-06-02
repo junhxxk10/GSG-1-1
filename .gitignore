@@ -7,3 +7,4 @@ build
 .env.production.local
 npm-debug.log*
 StudyMap.zip
+StudyMap.html
