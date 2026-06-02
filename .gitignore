@@ -1,1 +1,8 @@
-node_modules\nbuild\n.env\n.env.local
+node_modules
+build
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+npm-debug.log*
