@@ -1,0 +1,87 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  font-family: "Noto Sans KR", sans-serif;
+  background-color: #f5f0ff;
+  overscroll-behavior: none;
+}
+
+/* React Flow customization */
+.react-flow__renderer {
+  border-radius: 1rem;
+}
+
+.react-flow__controls {
+  border-radius: 1rem !important;
+  overflow: hidden;
+  box-shadow: 0 2px 15px rgba(139, 92, 246, 0.1) !important;
+  border: none !important;
+}
+
+.react-flow__controls-button {
+  background: white !important;
+  border: none !important;
+  border-bottom: 1px solid #f0e6ff !important;
+}
+
+.react-flow__controls-button:hover {
+  background: #f0e6ff !important;
+}
+
+.react-flow__minimap {
+  border-radius: 1rem !important;
+  overflow: hidden;
+  box-shadow: 0 2px 15px rgba(139, 92, 246, 0.1) !important;
+  border: none !important;
+}
+
+/* Safe area for bottom nav on mobile */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Smooth animations */
+.transition-all {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* Line clamp */
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #e8d5f5;
+  border-radius: 4px;
+}
+
+/* Bounce animation */
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+.animate-bounce {
+  animation: bounce 0.8s infinite;
+}
