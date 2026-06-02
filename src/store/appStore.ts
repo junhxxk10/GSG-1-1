@@ -305,6 +305,7 @@ export const CURRICULUM_DATA: Record<string, CurriculumUnit[]> = {
     {
       id: "sci-1",
       subject: "과학",
+      category: "1학기",
       grade: "고1",
       chapter: "통합과학 1단원",
       unit: "물질의 규칙성과 결합",
@@ -315,6 +316,7 @@ export const CURRICULUM_DATA: Record<string, CurriculumUnit[]> = {
     {
       id: "sci-2",
       subject: "과학",
+      category: "1학기",
       grade: "고1",
       chapter: "통합과학 2단원",
       unit: "자연의 구성 물질",
@@ -325,6 +327,7 @@ export const CURRICULUM_DATA: Record<string, CurriculumUnit[]> = {
     {
       id: "sci-3",
       subject: "과학",
+      category: "1학기",
       grade: "고1",
       chapter: "통합과학 3단원",
       unit: "역학적 시스템",
@@ -335,6 +338,7 @@ export const CURRICULUM_DATA: Record<string, CurriculumUnit[]> = {
     {
       id: "sci-4",
       subject: "과학",
+      category: "2학기",
       grade: "고1",
       chapter: "통합과학 4단원",
       unit: "지구 시스템",
@@ -345,6 +349,7 @@ export const CURRICULUM_DATA: Record<string, CurriculumUnit[]> = {
     {
       id: "sci-5",
       subject: "과학",
+      category: "2학기",
       grade: "고1",
       chapter: "통합과학 5단원",
       unit: "생물다양성과 유지",
@@ -355,6 +360,7 @@ export const CURRICULUM_DATA: Record<string, CurriculumUnit[]> = {
     {
       id: "sci-6",
       subject: "과학",
+      category: "2학기",
       grade: "고1",
       chapter: "통합과학 6단원",
       unit: "생태계와 환경",

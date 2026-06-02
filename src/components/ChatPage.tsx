@@ -170,7 +170,7 @@ export default function ChatPage({ user, qaItems, currentUnit, onQAAdded, onUnit
 
       {/* Unit selector — accordion */}
       {showUnitSelector && (
-        <div className="bg-white border-b border-purple-100 shadow-soft max-h-72 overflow-y-auto">
+        <div className="bg-white border-b border-purple-100 shadow-soft max-h-[60vh] overflow-y-auto">
           <div className="p-3 space-y-1">
             <p className="text-xs font-semibold text-gray-400 mb-2">과목을 눌러 단원 목록을 펼쳐보세요</p>
             {allSubjects.map((subject) => {
@@ -180,7 +180,6 @@ export default function ChatPage({ user, qaItems, currentUnit, onQAAdded, onUnit
 
               return (
                 <div key={subject}>
-                  {/* Subject header — clickable */}
                   <button
                     onClick={() => toggleSubject(subject)}
                     className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl bg-pastel-lavender active:scale-[0.98] transition-all"
@@ -189,9 +188,8 @@ export default function ChatPage({ user, qaItems, currentUnit, onQAAdded, onUnit
                     <span className="text-purple-400 text-xs">{isExpanded ? "▲" : "▼"}</span>
                   </button>
 
-                  {/* Unit list */}
                   {isExpanded && (
-                    <div className="mt-1 ml-2 space-y-1 pb-1">
+                    <div className="mt-1 ml-2 pb-1">
                       {hasCategories ? (
                         (() => {
                           const categories = Array.from(new Set(units.map((u) => u.category).filter(Boolean))) as string[];
@@ -199,13 +197,11 @@ export default function ChatPage({ user, qaItems, currentUnit, onQAAdded, onUnit
                             <div key={cat} className="mb-2">
                               <p className="text-xs font-semibold text-gray-400 px-2 py-1">▸ {cat}</p>
                               {units.filter((u) => u.category === cat).map((unit) => (
-                                <button
-                                  key={unit.id}
+                                <button key={unit.id}
                                   onClick={() => { onUnitChange(unit); storage.setCurrentUnit(unit); setShowUnitSelector(false); }}
                                   className={`w-full text-left px-3 py-2 rounded-xl text-xs transition-all active:scale-[0.98] mb-0.5 ${
                                     currentUnit?.id === unit.id ? "bg-purple-100 text-purple-700 font-semibold" : "bg-gray-50 text-gray-600 hover:bg-purple-50"
-                                  }`}
-                                >
+                                  }`}>
                                   {unit.unit}
                                 </button>
                               ))}
@@ -213,14 +209,15 @@ export default function ChatPage({ user, qaItems, currentUnit, onQAAdded, onUnit
                           ));
                         })()
                       ) : (
-                        <button
-                          onClick={() => { onUnitChange(units[0]); storage.setCurrentUnit(units[0]); setShowUnitSelector(false); }}
-                          className={`w-full text-left px-3 py-2 rounded-xl text-xs transition-all active:scale-[0.98] ${
-                            currentUnit?.id === units[0].id ? "bg-purple-100 text-purple-700 font-semibold" : "bg-gray-50 text-gray-600 hover:bg-purple-50"
-                          }`}
-                        >
-                          {subject} (공통)
-                        </button>
+                        units.map((unit) => (
+                          <button key={unit.id}
+                            onClick={() => { onUnitChange(unit); storage.setCurrentUnit(unit); setShowUnitSelector(false); }}
+                            className={`w-full text-left px-3 py-2 rounded-xl text-xs transition-all active:scale-[0.98] mb-0.5 ${
+                              currentUnit?.id === unit.id ? "bg-purple-100 text-purple-700 font-semibold" : "bg-gray-50 text-gray-600 hover:bg-purple-50"
+                            }`}>
+                            {unit.unit}
+                          </button>
+                        ))
                       )}
                     </div>
                   )}
