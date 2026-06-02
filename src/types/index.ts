@@ -21,6 +21,7 @@ export interface QAItem {
 export interface CurriculumUnit {
   id: string;
   subject: string;
+  category?: string;
   grade: string;
   chapter: string;
   unit: string;

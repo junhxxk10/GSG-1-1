@@ -99,13 +99,15 @@ export default function ChatPage({ user, qaItems, currentUnit, onQAAdded, onUnit
 
   const formatContent = (text: string) => {
     return text.split("\n").map((line, i) => {
-      const boldFormatted = line.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+      const formatted = line
+        .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+        .replace(/==(.+?)==/g, '<mark style="background:#fff176;padding:0 2px;border-radius:3px;font-weight:500">$1</mark>');
       if (line.startsWith("• ")) {
         return (
           <li
             key={i}
             className="ml-4 text-sm leading-relaxed"
-            dangerouslySetInnerHTML={{ __html: boldFormatted.slice(2) }}
+            dangerouslySetInnerHTML={{ __html: formatted.slice(2) }}
           />
         );
       }
@@ -113,7 +115,7 @@ export default function ChatPage({ user, qaItems, currentUnit, onQAAdded, onUnit
         <p
           key={i}
           className="text-sm leading-relaxed"
-          dangerouslySetInnerHTML={{ __html: boldFormatted }}
+          dangerouslySetInnerHTML={{ __html: formatted }}
         />
       );
     });
@@ -129,7 +131,7 @@ export default function ChatPage({ user, qaItems, currentUnit, onQAAdded, onUnit
           <h2 className="font-bold text-gray-800">AI 질문하기</h2>
           {currentUnit && (
             <p className="text-xs text-purple-400">
-              {currentUnit.subject} · {currentUnit.unit}
+              {currentUnit.subject}{currentUnit.category ? ` > ${currentUnit.category}` : ""} · {currentUnit.unit}
             </p>
           )}
         </div>
@@ -143,33 +145,51 @@ export default function ChatPage({ user, qaItems, currentUnit, onQAAdded, onUnit
 
       {/* Unit selector dropdown */}
       {showUnitSelector && (
-        <div className="bg-white border-b border-purple-100 shadow-soft max-h-64 overflow-y-auto">
+        <div className="bg-white border-b border-purple-100 shadow-soft max-h-72 overflow-y-auto">
           <div className="p-3">
             <p className="text-xs font-semibold text-gray-500 mb-2">공부하는 단원 선택</p>
-            {allSubjects.map((subject) => (
-              <div key={subject} className="mb-3">
-                <p className="text-xs font-bold text-purple-600 mb-1">{subject}</p>
-                <div className="space-y-1">
-                  {CURRICULUM_DATA[subject].map((unit) => (
-                    <button
-                      key={unit.id}
-                      onClick={() => {
-                        onUnitChange(unit);
-                        storage.setCurrentUnit(unit);
-                        setShowUnitSelector(false);
-                      }}
-                      className={`w-full text-left px-3 py-2 rounded-xl text-xs transition-all active:scale-98 ${
-                        currentUnit?.id === unit.id
-                          ? "bg-purple-100 text-purple-700 font-medium"
-                          : "bg-gray-50 text-gray-600 hover:bg-purple-50"
-                      }`}
-                    >
-                      <span className="font-medium">{unit.grade}</span> · {unit.chapter} · {unit.unit}
-                    </button>
-                  ))}
+            {allSubjects.map((subject) => {
+              const units = CURRICULUM_DATA[subject];
+              const hasCategories = units.some((u) => u.category);
+              if (hasCategories) {
+                const categories = Array.from(new Set(units.map((u) => u.category).filter(Boolean))) as string[];
+                return (
+                  <div key={subject} className="mb-3">
+                    <p className="text-xs font-bold text-purple-600 mb-1">{subject}</p>
+                    {categories.map((cat) => (
+                      <div key={cat} className="mb-2 ml-2">
+                        <p className="text-xs font-semibold text-gray-400 mb-1">▸ {cat}</p>
+                        <div className="space-y-1">
+                          {units.filter((u) => u.category === cat).map((unit) => (
+                            <button
+                              key={unit.id}
+                              onClick={() => { onUnitChange(unit); storage.setCurrentUnit(unit); setShowUnitSelector(false); }}
+                              className={`w-full text-left px-3 py-2 rounded-xl text-xs transition-all active:scale-98 ${
+                                currentUnit?.id === unit.id ? "bg-purple-100 text-purple-700 font-medium" : "bg-gray-50 text-gray-600 hover:bg-purple-50"
+                              }`}
+                            >
+                              {unit.unit}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                );
+              }
+              return (
+                <div key={subject} className="mb-2">
+                  <button
+                    onClick={() => { onUnitChange(units[0]); storage.setCurrentUnit(units[0]); setShowUnitSelector(false); }}
+                    className={`w-full text-left px-3 py-2 rounded-xl text-xs transition-all active:scale-98 ${
+                      currentUnit?.id === units[0].id ? "bg-purple-100 text-purple-700 font-medium" : "bg-gray-50 text-gray-600 hover:bg-purple-50"
+                    }`}
+                  >
+                    <span className="font-bold text-purple-500">{subject}</span>
+                  </button>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}

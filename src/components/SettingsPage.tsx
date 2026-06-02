@@ -105,7 +105,9 @@ export default function SettingsPage({
           {currentUnit ? (
             <div className="bg-pastel-blue rounded-xl p-3 mb-3">
               <p className="font-medium text-blue-700 text-sm">{currentUnit.unit}</p>
-              <p className="text-xs text-blue-400">{currentUnit.subject} · {currentUnit.grade} · {currentUnit.chapter}</p>
+              <p className="text-xs text-blue-400">
+                {currentUnit.subject}{currentUnit.category ? ` > ${currentUnit.category}` : ""} · {currentUnit.grade}
+              </p>
             </div>
           ) : (
             <div className="bg-gray-50 rounded-xl p-3 mb-3">
@@ -113,30 +115,50 @@ export default function SettingsPage({
             </div>
           )}
 
-          <div className="space-y-3 max-h-48 overflow-y-auto">
-            {allSubjects.map((subject) => (
-              <div key={subject}>
-                <p className="text-xs font-bold text-purple-500 mb-1">{subject}</p>
-                <div className="space-y-1">
-                  {CURRICULUM_DATA[subject].map((unit) => (
-                    <button
-                      key={unit.id}
-                      onClick={() => {
-                        onUnitChange(unit);
-                        storage.setCurrentUnit(unit);
-                      }}
-                      className={`w-full text-left px-3 py-2 rounded-xl text-xs transition-all active:scale-[0.98] ${
-                        currentUnit?.id === unit.id
-                          ? "bg-purple-100 text-purple-700 font-semibold"
-                          : "bg-gray-50 text-gray-500 hover:bg-purple-50"
-                      }`}
-                    >
-                      {unit.grade} · {unit.chapter} · {unit.unit}
-                    </button>
-                  ))}
+          <div className="space-y-3 max-h-56 overflow-y-auto">
+            {allSubjects.map((subject) => {
+              const units = CURRICULUM_DATA[subject];
+              const hasCategories = units.some((u) => u.category);
+              if (hasCategories) {
+                const categories = Array.from(new Set(units.map((u) => u.category).filter(Boolean))) as string[];
+                return (
+                  <div key={subject}>
+                    <p className="text-xs font-bold text-purple-500 mb-1">{subject}</p>
+                    {categories.map((cat) => (
+                      <div key={cat} className="mb-2 ml-2">
+                        <p className="text-xs font-semibold text-gray-400 mb-1">▸ {cat}</p>
+                        <div className="space-y-1">
+                          {units.filter((u) => u.category === cat).map((unit) => (
+                            <button
+                              key={unit.id}
+                              onClick={() => { onUnitChange(unit); storage.setCurrentUnit(unit); }}
+                              className={`w-full text-left px-3 py-2 rounded-xl text-xs transition-all active:scale-[0.98] ${
+                                currentUnit?.id === unit.id ? "bg-purple-100 text-purple-700 font-semibold" : "bg-gray-50 text-gray-500 hover:bg-purple-50"
+                              }`}
+                            >
+                              {unit.unit}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                );
+              }
+              return (
+                <div key={subject}>
+                  <p className="text-xs font-bold text-purple-500 mb-1">{subject}</p>
+                  <button
+                    onClick={() => { onUnitChange(units[0]); storage.setCurrentUnit(units[0]); }}
+                    className={`w-full text-left px-3 py-2 rounded-xl text-xs transition-all active:scale-[0.98] ${
+                      currentUnit?.id === units[0].id ? "bg-purple-100 text-purple-700 font-semibold" : "bg-gray-50 text-gray-500 hover:bg-purple-50"
+                    }`}
+                  >
+                    {subject} (공통)
+                  </button>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {currentUnit && (

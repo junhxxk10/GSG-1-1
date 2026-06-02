@@ -11,7 +11,9 @@ interface Props {
 export default function QADetailModal({ qa, onClose, onBookmarkToggle }: Props) {
   const formatContent = (text: string) => {
     return text.split("\n").map((line, i) => {
-      const boldFormatted = line.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+      const boldFormatted = line
+        .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+        .replace(/==(.+?)==/g, '<mark style="background:#fff176;padding:0 2px;border-radius:3px;font-weight:500">$1</mark>');
       if (line.startsWith("• ")) {
         return (
           <li
