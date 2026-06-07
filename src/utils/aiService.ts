@@ -14,7 +14,7 @@ export interface AISettings {
 
 export const AI_MODELS = {
   openai: ["gpt-4o", "gpt-4o-mini", "gpt-4-turbo"],
-  gemini: ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-2.0-flash-exp"],
+  gemini: ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.0-flash-lite", "gemini-2.5-pro"],
 };
 
 export function getAISettings(): AISettings {
@@ -24,7 +24,7 @@ export function getAISettings(): AISettings {
     openaiKey: localStorage.getItem("openai_api_key") || "",
     openaiModel: localStorage.getItem("openai_model") || "gpt-4o-mini",
     geminiKey: localStorage.getItem("gemini_api_key") || process.env.REACT_APP_GEMINI_API_KEY || "",
-    geminiModel: localStorage.getItem("gemini_model") || "gemini-2.0-flash-exp",
+    geminiModel: localStorage.getItem("gemini_model") || "gemini-2.5-flash",
   };
 }
 
@@ -111,8 +111,14 @@ async function callGemini(systemPrompt: string, question: string, apiKey: string
       }),
     }
   );
-  if (!res.ok) throw new Error(`Gemini API error: ${res.status}`);
   const data = await res.json();
+  if (!res.ok) {
+    const msg = data?.error?.message || `HTTP ${res.status}`;
+    if (res.status === 429) throw new Error(`Gemini 할당량 초과: ${msg}`);
+    if (res.status === 400) throw new Error(`Gemini 요청 오류 (잘못된 키 또는 모델): ${msg}`);
+    if (res.status === 403) throw new Error(`Gemini 인증 실패 (키 확인 필요): ${msg}`);
+    throw new Error(`Gemini API 오류 ${res.status}: ${msg}`);
+  }
   return data.candidates[0].content.parts[0].text;
 }
 
@@ -124,23 +130,18 @@ export async function askClaude(
   const settings = getAISettings();
   const systemPrompt = buildSystemPrompt(currentUnit, previousQAs);
 
-  try {
-    switch (settings.provider) {
-      case "claude":
-        if (!settings.claudeKey) throw new Error("no key");
-        return await callClaude(systemPrompt, question, settings.claudeKey);
-      case "openai":
-        if (!settings.openaiKey) throw new Error("no key");
-        return await callOpenAI(systemPrompt, question, settings.openaiKey, settings.openaiModel);
-      case "gemini":
-        if (!settings.geminiKey) throw new Error("no key");
-        return await callGemini(systemPrompt, question, settings.geminiKey, settings.geminiModel);
-      default:
-        throw new Error("Unknown provider");
-    }
-  } catch (err) {
-    console.error("AI call failed:", err);
-    return generateMockAnswer(question, currentUnit);
+  switch (settings.provider) {
+    case "claude":
+      if (!settings.claudeKey) throw new Error("Claude API 키가 없어요. 설정 탭에서 입력해주세요.");
+      return await callClaude(systemPrompt, question, settings.claudeKey);
+    case "openai":
+      if (!settings.openaiKey) throw new Error("OpenAI API 키가 없어요. 설정 탭에서 입력해주세요.");
+      return await callOpenAI(systemPrompt, question, settings.openaiKey, settings.openaiModel);
+    case "gemini":
+      if (!settings.geminiKey) throw new Error("Gemini API 키가 없어요. 설정 탭에서 입력해주세요.");
+      return await callGemini(systemPrompt, question, settings.geminiKey, settings.geminiModel);
+    default:
+      throw new Error("Unknown provider");
   }
 }
 

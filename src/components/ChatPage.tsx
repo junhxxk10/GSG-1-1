@@ -125,10 +125,11 @@ export default function ChatPage({ user, qaItems, currentUnit, onQAAdded, onUnit
         ...prev,
         { id: `a-${Date.now()}`, role: "assistant", content: answer, timestamp: new Date().toISOString(), qaId: qaItem.id },
       ]);
-    } catch {
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "알 수 없는 오류";
       setMessages((prev) => [
         ...prev,
-        { id: `err-${Date.now()}`, role: "assistant", content: "죄송해요, 오류가 발생했어요. 다시 시도해볼게요!", timestamp: new Date().toISOString() },
+        { id: `err-${Date.now()}`, role: "assistant", content: `⚠️ AI 오류: ${msg}`, timestamp: new Date().toISOString() },
       ]);
     }
     setLoading(false);
