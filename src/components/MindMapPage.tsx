@@ -33,23 +33,23 @@ function CustomNode({ data }: NodeProps) {
 
   return (
     <div
-      className="px-3 py-2 rounded-2xl cursor-pointer transition-all"
+      className="px-4 py-3 rounded-2xl cursor-pointer transition-all"
       style={{
         background: colors.bg,
         border: `2px solid ${colors.border}`,
         color: colors.text,
-        minWidth: data.type === "root" ? 110 : 85,
-        maxWidth: data.type === "qa" ? 185 : 170,
+        minWidth: data.type === "root" ? 150 : data.type === "unit" ? 190 : data.type === "concept" ? 110 : 160,
+        maxWidth: data.type === "qa" ? 250 : data.type === "unit" ? 230 : 190,
         boxShadow: data.isCurrentUnit
           ? `0 0 0 3px ${colors.border}, 0 4px 16px rgba(0,0,0,0.1)`
           : "0 2px 12px rgba(139, 92, 246, 0.1)",
       }}
     >
       <Handle type="target" position={Position.Left} style={{ opacity: 0 }} />
-      <div className="flex items-start gap-1.5">
-        <span className="text-base flex-shrink-0">{icons[data.type] || "💡"}</span>
+      <div className="flex items-start gap-2">
+        <span className="text-lg flex-shrink-0">{icons[data.type] || "💡"}</span>
         <div className="min-w-0">
-          <p className="text-xs font-semibold leading-tight break-words" style={{ color: colors.text }}>
+          <p className="text-xs font-semibold leading-snug break-words whitespace-pre-line" style={{ color: colors.text }}>
             {data.label}
           </p>
           {data.type === "root" && data.count !== undefined && (

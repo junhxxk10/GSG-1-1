@@ -19,12 +19,12 @@ export const AI_MODELS = {
 
 export function getAISettings(): AISettings {
   return {
-    provider: (localStorage.getItem("ai_provider") as AIProvider) || "claude",
+    provider: (localStorage.getItem("ai_provider") as AIProvider) || (process.env.REACT_APP_AI_PROVIDER as AIProvider) || "gemini",
     claudeKey: localStorage.getItem("studymap_api_key") || process.env.REACT_APP_CLAUDE_API_KEY || "",
     openaiKey: localStorage.getItem("openai_api_key") || "",
     openaiModel: localStorage.getItem("openai_model") || "gpt-4o-mini",
-    geminiKey: localStorage.getItem("gemini_api_key") || "",
-    geminiModel: localStorage.getItem("gemini_model") || "gemini-1.5-flash",
+    geminiKey: localStorage.getItem("gemini_api_key") || process.env.REACT_APP_GEMINI_API_KEY || "",
+    geminiModel: localStorage.getItem("gemini_model") || "gemini-2.0-flash-exp",
   };
 }
 
