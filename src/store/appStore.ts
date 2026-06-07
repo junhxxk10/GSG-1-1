@@ -775,3 +775,97 @@ export const CURRICULUM_DATA: Record<string, CurriculumUnit[]> = {
     },
   ],
 };
+
+export interface ResourceLink {
+  name: string;
+  url: string;
+  desc: string;
+}
+
+// 과목별 참고 사이트
+export const SUBJECT_RESOURCES: Record<string, ResourceLink[]> = {
+  수학: [
+    { name: "EBS 수학", url: "https://www.ebsi.co.kr/ebs/pot/potr/retrievePotMain.ebs", desc: "EBS 수학 강의·문제" },
+    { name: "GeoGebra", url: "https://www.geogebra.org/graphing", desc: "함수·그래프 시각화" },
+    { name: "수학방", url: "https://mathbang.net", desc: "개념 정리·예제" },
+  ],
+  영어: [
+    { name: "EBS 영어", url: "https://www.ebsi.co.kr", desc: "EBS 영어 강의" },
+    { name: "Cambridge Dictionary", url: "https://dictionary.cambridge.org/ko", desc: "영영·영한 사전" },
+    { name: "Longman Dictionary", url: "https://www.ldoceonline.com", desc: "예문 중심 영어 사전" },
+  ],
+  국어: [
+    { name: "국립국어원", url: "https://www.korean.go.kr", desc: "표준국어대사전·어문규범" },
+    { name: "우리말샘", url: "https://opendict.korean.go.kr", desc: "한국어 열린 사전" },
+    { name: "EBS 국어", url: "https://www.ebsi.co.kr", desc: "EBS 국어 강의" },
+  ],
+  과학: [
+    { name: "사이언스올", url: "https://www.scienceall.com", desc: "과학 개념·용어 사전" },
+    { name: "EBS 과학", url: "https://www.ebsi.co.kr", desc: "EBS 과학 강의" },
+    { name: "PhET 시뮬레이션", url: "https://phet.colorado.edu/ko", desc: "물리·화학·생물 시뮬레이션" },
+  ],
+  사회: [
+    { name: "EBS 사회", url: "https://www.ebsi.co.kr", desc: "EBS 사회 강의" },
+    { name: "두산백과", url: "https://www.doopedia.co.kr", desc: "사회·역사 개념 사전" },
+    { name: "통계청", url: "https://www.kostat.go.kr", desc: "한국 사회 통계 자료" },
+  ],
+};
+
+// 카테고리별 추가 참고 사이트
+export const CATEGORY_RESOURCES: Record<string, ResourceLink[]> = {
+  문학: [
+    { name: "한국고전종합DB", url: "https://db.itkc.or.kr", desc: "고전 문학 원문 자료" },
+    { name: "문학나눔", url: "https://www.munhaknaum.com", desc: "현대 문학 작품" },
+  ],
+  비문학: [
+    { name: "RISS", url: "https://www.riss.kr", desc: "학술 논문·자료 검색" },
+    { name: "KISTI", url: "https://www.kisti.re.kr", desc: "과학기술 정보 검색" },
+  ],
+  언어: [
+    { name: "국립국어원", url: "https://www.korean.go.kr", desc: "표준국어대사전" },
+    { name: "한국어기초사전", url: "https://krdict.korean.go.kr", desc: "기초 어휘 사전" },
+  ],
+  한지: [
+    { name: "국토지리정보원", url: "https://www.ngii.go.kr", desc: "지형도·위성지도" },
+    { name: "통계지리정보서비스", url: "https://sgis.kostat.go.kr", desc: "인구·지역 통계 지도" },
+  ],
+  세지: [
+    { name: "Google 어스", url: "https://earth.google.com/web", desc: "세계 지형 탐색" },
+    { name: "CIA World Factbook", url: "https://www.cia.gov/the-world-factbook", desc: "각국 정보·통계" },
+  ],
+  사회문화: [
+    { name: "통계청", url: "https://www.kostat.go.kr", desc: "사회·인구 통계" },
+    { name: "한국리서치", url: "https://hrcopinion.co.kr", desc: "사회 여론·트렌드" },
+  ],
+  "윤리와 사상": [
+    { name: "철학사전", url: "https://terms.naver.com/list.naver?cid=41908", desc: "철학 개념 사전" },
+    { name: "Stanford Encyclopedia", url: "https://plato.stanford.edu", desc: "철학 백과사전 (영문)" },
+  ],
+  경제: [
+    { name: "한국은행 경제교육", url: "https://www.bok.or.kr/portal/main/sub/B0000222.do", desc: "경제 개념 교육 자료" },
+    { name: "KDI 경제정보센터", url: "https://eiec.kdi.re.kr", desc: "경제 지식·통계" },
+  ],
+  "정치와 법": [
+    { name: "법제처", url: "https://www.law.go.kr", desc: "한국 법령 원문" },
+    { name: "헌법재판소", url: "https://www.ccourt.go.kr", desc: "헌법 판례·자료" },
+  ],
+  "I-1. 물질의 규칙성과 결합": [
+    { name: "주기율표", url: "https://ptable.com/?lang=ko", desc: "인터랙티브 주기율표" },
+    { name: "PhET 화학", url: "https://phet.colorado.edu/ko/simulations/category/chemistry", desc: "화학 결합 시뮬레이션" },
+  ],
+  "II-1. 역학적 시스템": [
+    { name: "PhET 물리", url: "https://phet.colorado.edu/ko/simulations/category/physics", desc: "뉴턴 법칙·운동 시뮬레이션" },
+  ],
+  "II-3. 생명 시스템": [
+    { name: "NCBI", url: "https://www.ncbi.nlm.nih.gov", desc: "유전자·생명 과학 자료" },
+    { name: "iBiology", url: "https://www.ibiology.org", desc: "세포·분자생물학 강의 (영문)" },
+  ],
+};
+
+export function getResourcesForUnit(unit: CurriculumUnit | null): ResourceLink[] {
+  if (!unit) return [];
+  const subjectRes = SUBJECT_RESOURCES[unit.subject] || [];
+  const categoryRes = unit.category ? (CATEGORY_RESOURCES[unit.category] || []) : [];
+  // 카테고리 자료를 앞에, 최대 4개
+  return [...categoryRes, ...subjectRes].slice(0, 4);
+}

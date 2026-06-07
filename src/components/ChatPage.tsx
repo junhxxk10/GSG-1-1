@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { QAItem, CurriculumUnit, User } from "../types";
 import { askClaude, createQAItem } from "../utils/aiService";
-import { storage, CURRICULUM_DATA } from "../store/appStore";
+import { storage, CURRICULUM_DATA, getResourcesForUnit } from "../store/appStore";
 
 interface Props {
   user: User;
@@ -37,7 +37,8 @@ function formatContent(text: string) {
   return text.split("\n").map((line, i) => {
     const formatted = line
       .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
-      .replace(/==(.+?)==/g, '<mark style="background:#fff176;padding:0 2px;border-radius:3px;font-weight:500">$1</mark>');
+      .replace(/==(.+?)==/g, '<mark style="background:#fff176;padding:0 2px;border-radius:3px;font-weight:500">$1</mark>')
+      .replace(/\[(.+?)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" style="color:#7c3aed;text-decoration:underline">$1</a>');
     if (line.startsWith("• ")) {
       return (
         <li key={i} className="ml-4 text-sm leading-relaxed"
@@ -241,27 +242,50 @@ export default function ChatPage({ user, qaItems, currentUnit, onQAAdded, onUnit
               </div>
             );
           }
+          const resources = msg.role === "assistant" && msg.qaId ? getResourcesForUnit(currentUnit) : [];
           return (
-            <div key={msg.id} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-              {msg.role === "assistant" && (
-                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-purple-400 to-violet-500 flex items-center justify-center mr-2 mt-1 flex-shrink-0">
-                  <span className="text-white text-xs">AI</span>
+            <div key={msg.id} className={`flex flex-col ${msg.role === "user" ? "items-end" : "items-start"}`}>
+              <div className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"} w-full`}>
+                {msg.role === "assistant" && (
+                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-purple-400 to-violet-500 flex items-center justify-center mr-2 mt-1 flex-shrink-0">
+                    <span className="text-white text-xs">AI</span>
+                  </div>
+                )}
+                <div className={`max-w-[80%] rounded-2xl px-4 py-3 ${
+                  msg.role === "user"
+                    ? "bg-gradient-to-br from-purple-500 to-violet-500 text-white rounded-tr-sm"
+                    : "bg-white shadow-soft rounded-tl-sm"
+                }`}>
+                  {msg.role === "user" ? (
+                    <p className="text-sm leading-relaxed">{msg.content}</p>
+                  ) : (
+                    <div className="text-gray-700 space-y-1">{formatContent(msg.content)}</div>
+                  )}
+                  <p className={`text-xs mt-1 ${msg.role === "user" ? "text-purple-200 text-right" : "text-gray-300"}`}>
+                    {new Date(msg.timestamp).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}
+                  </p>
+                </div>
+              </div>
+
+              {resources.length > 0 && (
+                <div className="ml-9 mt-1.5 mb-1">
+                  <p className="text-xs text-gray-400 mb-1">📎 참고 자료</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {resources.map((r) => (
+                      <a
+                        key={r.url}
+                        href={r.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title={r.desc}
+                        className="px-2.5 py-1 rounded-xl bg-pastel-lavender text-purple-600 text-xs font-medium hover:bg-purple-100 transition-colors"
+                      >
+                        {r.name} ↗
+                      </a>
+                    ))}
+                  </div>
                 </div>
               )}
-              <div className={`max-w-[80%] rounded-2xl px-4 py-3 ${
-                msg.role === "user"
-                  ? "bg-gradient-to-br from-purple-500 to-violet-500 text-white rounded-tr-sm"
-                  : "bg-white shadow-soft rounded-tl-sm"
-              }`}>
-                {msg.role === "user" ? (
-                  <p className="text-sm leading-relaxed">{msg.content}</p>
-                ) : (
-                  <div className="text-gray-700 space-y-1">{formatContent(msg.content)}</div>
-                )}
-                <p className={`text-xs mt-1 ${msg.role === "user" ? "text-purple-200 text-right" : "text-gray-300"}`}>
-                  {new Date(msg.timestamp).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}
-                </p>
-              </div>
             </div>
           );
         })}
