@@ -23,7 +23,7 @@ export function getAISettings(): AISettings {
   const geminiModel =
     storedGeminiModel && validGeminiModels.includes(storedGeminiModel)
       ? storedGeminiModel
-      : "gemini-2.5-flash";
+      : "gemini-2.0-flash";
 
   return {
     provider: (localStorage.getItem("ai_provider") as AIProvider) || (process.env.REACT_APP_AI_PROVIDER as AIProvider) || "gemini",
@@ -105,7 +105,7 @@ async function callOpenAI(systemPrompt: string, question: string, apiKey: string
   return data.choices[0].message.content;
 }
 
-async function callGemini(systemPrompt: string, question: string, apiKey: string, model: string): Promise<string> {
+async function callGeminiOnce(systemPrompt: string, question: string, apiKey: string, model: string): Promise<string> {
   const res = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
     {
@@ -121,12 +121,32 @@ async function callGemini(systemPrompt: string, question: string, apiKey: string
   const data = await res.json();
   if (!res.ok) {
     const msg = data?.error?.message || `HTTP ${res.status}`;
-    if (res.status === 429) throw new Error(`Gemini 할당량 초과: ${msg}`);
-    if (res.status === 400) throw new Error(`Gemini 요청 오류 (잘못된 키 또는 모델): ${msg}`);
-    if (res.status === 403) throw new Error(`Gemini 인증 실패 (키 확인 필요): ${msg}`);
-    throw new Error(`Gemini API 오류 ${res.status}: ${msg}`);
+    const err = new Error(msg) as Error & { status: number };
+    err.status = res.status;
+    throw err;
   }
   return data.candidates[0].content.parts[0].text;
+}
+
+async function callGemini(systemPrompt: string, question: string, apiKey: string, model: string): Promise<string> {
+  // 순서대로 시도: 지정 모델 → gemini-2.0-flash → gemini-2.0-flash-lite
+  const fallbacks = [model, "gemini-2.0-flash", "gemini-2.0-flash-lite"].filter(
+    (m, i, arr) => arr.indexOf(m) === i
+  );
+  let lastErr: Error = new Error("Gemini 호출 실패");
+  for (const m of fallbacks) {
+    try {
+      return await callGeminiOnce(systemPrompt, question, apiKey, m);
+    } catch (e: any) {
+      lastErr = e;
+      if (e.status === 503 || e.status === 429) continue; // 과부하·할당량 → 다음 모델 시도
+      // 키 오류 등 다른 에러는 바로 중단
+      if (e.status === 400) throw new Error(`Gemini 요청 오류 (잘못된 키 또는 모델): ${e.message}`);
+      if (e.status === 403) throw new Error(`Gemini 인증 실패 (키 확인 필요): ${e.message}`);
+      throw new Error(`Gemini API 오류: ${e.message}`);
+    }
+  }
+  throw new Error(`Gemini 모든 모델 응답 없음 (서버 과부하). 잠시 후 다시 시도해주세요. (${lastErr.message})`);
 }
 
 export async function askClaude(
