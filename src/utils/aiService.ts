@@ -1,7 +1,7 @@
 import { QAItem, CurriculumUnit } from "../types";
 import { v4 as uuidv4 } from "uuid";
 
-export type AIProvider = "claude" | "openai" | "gemini";
+export type AIProvider = "claude" | "openai" | "gemini" | "groq";
 
 export interface AISettings {
   provider: AIProvider;
@@ -10,28 +10,38 @@ export interface AISettings {
   openaiModel: string;
   geminiKey: string;
   geminiModel: string;
+  groqKey: string;
+  groqModel: string;
 }
 
 export const AI_MODELS = {
   openai: ["gpt-4o", "gpt-4o-mini", "gpt-4-turbo"],
   gemini: ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.0-flash-lite", "gemini-2.5-pro"],
+  groq: ["llama-3.3-70b-versatile", "llama-3.1-8b-instant", "gemma2-9b-it", "mixtral-8x7b-32768"],
 };
 
 export function getAISettings(): AISettings {
   const storedGeminiModel = localStorage.getItem("gemini_model");
-  const validGeminiModels = AI_MODELS.gemini;
   const geminiModel =
-    storedGeminiModel && validGeminiModels.includes(storedGeminiModel)
+    storedGeminiModel && AI_MODELS.gemini.includes(storedGeminiModel)
       ? storedGeminiModel
       : "gemini-2.0-flash";
 
+  const storedGroqModel = localStorage.getItem("groq_model");
+  const groqModel =
+    storedGroqModel && AI_MODELS.groq.includes(storedGroqModel)
+      ? storedGroqModel
+      : "llama-3.3-70b-versatile";
+
   return {
-    provider: (localStorage.getItem("ai_provider") as AIProvider) || (process.env.REACT_APP_AI_PROVIDER as AIProvider) || "gemini",
+    provider: (localStorage.getItem("ai_provider") as AIProvider) || (process.env.REACT_APP_AI_PROVIDER as AIProvider) || "groq",
     claudeKey: localStorage.getItem("studymap_api_key") || process.env.REACT_APP_CLAUDE_API_KEY || "",
     openaiKey: localStorage.getItem("openai_api_key") || "",
     openaiModel: localStorage.getItem("openai_model") || "gpt-4o-mini",
     geminiKey: localStorage.getItem("gemini_api_key") || process.env.REACT_APP_GEMINI_API_KEY || "",
     geminiModel,
+    groqKey: localStorage.getItem("groq_api_key") || process.env.REACT_APP_GROQ_API_KEY || "",
+    groqModel,
   };
 }
 
@@ -42,6 +52,8 @@ export function saveAISettings(settings: Partial<AISettings>) {
   if (settings.openaiModel !== undefined) localStorage.setItem("openai_model", settings.openaiModel);
   if (settings.geminiKey !== undefined) localStorage.setItem("gemini_api_key", settings.geminiKey);
   if (settings.geminiModel !== undefined) localStorage.setItem("gemini_model", settings.geminiModel);
+  if (settings.groqKey !== undefined) localStorage.setItem("groq_api_key", settings.groqKey);
+  if (settings.groqModel !== undefined) localStorage.setItem("groq_model", settings.groqModel);
 }
 
 function buildSystemPrompt(currentUnit?: CurriculumUnit | null, previousQAs?: QAItem[]): string {
@@ -101,6 +113,31 @@ async function callOpenAI(systemPrompt: string, question: string, apiKey: string
     }),
   });
   if (!res.ok) throw new Error(`OpenAI API error: ${res.status}`);
+  const data = await res.json();
+  return data.choices[0].message.content;
+}
+
+async function callGroq(systemPrompt: string, question: string, apiKey: string, model: string): Promise<string> {
+  const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model,
+      max_tokens: 1024,
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: question },
+      ],
+    }),
+  });
+  if (!res.ok) {
+    const data = await res.json();
+    const msg = data?.error?.message || `HTTP ${res.status}`;
+    throw new Error(`Groq API 오류: ${msg}`);
+  }
   const data = await res.json();
   return data.choices[0].message.content;
 }
@@ -167,6 +204,9 @@ export async function askClaude(
     case "gemini":
       if (!settings.geminiKey) throw new Error("Gemini API 키가 없어요. 설정 탭에서 입력해주세요.");
       return await callGemini(systemPrompt, question, settings.geminiKey, settings.geminiModel);
+    case "groq":
+      if (!settings.groqKey) throw new Error("Groq API 키가 없어요. 설정 탭에서 입력해주세요.");
+      return await callGroq(systemPrompt, question, settings.groqKey, settings.groqModel);
     default:
       throw new Error("Unknown provider");
   }

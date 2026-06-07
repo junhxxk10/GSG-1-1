@@ -14,10 +14,11 @@ interface Props {
   onClearAll: () => void;
 }
 
-const PROVIDER_INFO: Record<AIProvider, { label: string; color: string; bg: string; placeholder: string; docsUrl: string }> = {
-  claude: { label: "Claude", color: "text-purple-700", bg: "bg-pastel-purple", placeholder: "sk-ant-api03-...", docsUrl: "https://console.anthropic.com" },
-  openai: { label: "OpenAI", color: "text-green-700", bg: "bg-green-50", placeholder: "sk-proj-...", docsUrl: "https://platform.openai.com" },
-  gemini: { label: "Gemini", color: "text-blue-700", bg: "bg-blue-50", placeholder: "AIza...", docsUrl: "https://aistudio.google.com" },
+const PROVIDER_INFO: Record<AIProvider, { label: string; color: string; bg: string; placeholder: string; badge?: string }> = {
+  claude: { label: "Claude", color: "text-purple-700", bg: "bg-pastel-purple", placeholder: "sk-ant-api03-..." },
+  openai: { label: "OpenAI", color: "text-green-700", bg: "bg-green-50", placeholder: "sk-proj-..." },
+  gemini: { label: "Gemini", color: "text-blue-700", bg: "bg-blue-50", placeholder: "AIza..." },
+  groq: { label: "Groq", color: "text-orange-700", bg: "bg-orange-50", placeholder: "gsk_...", badge: "무료" },
 };
 
 export default function SettingsPage({ user, filter, currentUnit, qaItems, onFilterChange, onUnitChange, onLogout, onClearAll }: Props) {
@@ -32,6 +33,8 @@ export default function SettingsPage({ user, filter, currentUnit, qaItems, onFil
   const [openaiModel, setOpenaiModel] = useState(aiSettings.openaiModel);
   const [geminiKey, setGeminiKey] = useState(aiSettings.geminiKey);
   const [geminiModel, setGeminiModel] = useState(aiSettings.geminiModel);
+  const [groqKey, setGroqKey] = useState(aiSettings.groqKey);
+  const [groqModel, setGroqModel] = useState(aiSettings.groqModel);
 
   const toggleSubject = (subject: string) => {
     setExpandedSubjects((prev) => {
@@ -42,7 +45,7 @@ export default function SettingsPage({ user, filter, currentUnit, qaItems, onFil
   };
 
   const handleSaveAI = () => {
-    saveAISettings({ provider, claudeKey, openaiKey, openaiModel, geminiKey, geminiModel });
+    saveAISettings({ provider, claudeKey, openaiKey, openaiModel, geminiKey, geminiModel, groqKey, groqModel });
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
@@ -87,18 +90,21 @@ export default function SettingsPage({ user, filter, currentUnit, qaItems, onFil
           <p className="font-semibold text-gray-700 text-sm mb-3">🤖 AI 설정</p>
 
           {/* Provider selector */}
-          <div className="grid grid-cols-3 gap-2 mb-4">
-            {(["claude", "openai", "gemini"] as AIProvider[]).map((p) => {
+          <div className="grid grid-cols-2 gap-2 mb-4">
+            {(["groq", "gemini", "claude", "openai"] as AIProvider[]).map((p) => {
               const info = PROVIDER_INFO[p];
               return (
                 <button
                   key={p}
                   onClick={() => setProvider(p)}
-                  className={`py-2.5 rounded-xl text-xs font-semibold transition-all active:scale-95 ${
+                  className={`py-2.5 rounded-xl text-xs font-semibold transition-all active:scale-95 flex items-center justify-center gap-1.5 ${
                     provider === p ? `${info.bg} ${info.color} ring-2 ring-offset-1 ring-current` : "bg-gray-50 text-gray-500"
                   }`}
                 >
                   {info.label}
+                  {info.badge && (
+                    <span className="px-1.5 py-0.5 rounded-full bg-green-100 text-green-600 text-[10px] font-bold">{info.badge}</span>
+                  )}
                 </button>
               );
             })}
@@ -159,6 +165,32 @@ export default function SettingsPage({ user, filter, currentUnit, qaItems, onFil
                 className="w-full px-3 py-2.5 rounded-xl bg-blue-50 text-xs text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-200"
               >
                 {AI_MODELS.gemini.map((m) => <option key={m} value={m}>{m}</option>)}
+              </select>
+            </div>
+          )}
+
+          {/* Groq settings */}
+          {provider === "groq" && (
+            <div className="space-y-2">
+              <div className="bg-green-50 rounded-xl px-3 py-2 mb-1">
+                <p className="text-xs text-green-700 font-semibold">🎉 무료 플랜 지원!</p>
+                <p className="text-xs text-green-600">console.groq.com에서 무료 가입 후 API 키 발급</p>
+              </div>
+              <label className="text-xs text-gray-500 font-medium">API 키 (Groq Console)</label>
+              <input
+                type="password"
+                value={groqKey}
+                onChange={(e) => setGroqKey(e.target.value)}
+                placeholder={PROVIDER_INFO.groq.placeholder}
+                className="w-full px-3 py-2.5 rounded-xl bg-orange-50 text-xs text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-200"
+              />
+              <label className="text-xs text-gray-500 font-medium">모델</label>
+              <select
+                value={groqModel}
+                onChange={(e) => setGroqModel(e.target.value)}
+                className="w-full px-3 py-2.5 rounded-xl bg-orange-50 text-xs text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-200"
+              >
+                {AI_MODELS.groq.map((m) => <option key={m} value={m}>{m}</option>)}
               </select>
             </div>
           )}
